@@ -1,107 +1,9 @@
 <?php
-use App\Models\UserAuth;
-use App\Models\UserAccount;
-function checkAuth($function,$action=null)
-	{
-
-        $PATH_APP=config('sys.PATH_APP');
-		// global $menu;
-		if(!array_key_exists("XlMemTzAitUmm77oX0ga",$_COOKIE) || $_COOKIE["XlMemTzAitUmm77oX0ga"]==="")
-		{
-			return array(403,'Access denied [0]');
-		}
-
-        $sn = $_COOKIE["XlMemTzAitUmm77oX0ga"];//權限人員
-        $ip = GetClientIP();
-        $C_UserAuth = new UserAuth;
-        $DataMod = $C_UserAuth->getDataModByUse($sn,$ip);
-		if($DataMod){
-            $functionName = $DataMod->function_name;
-			$sn = $DataMod->sn;
-			$username = $DataMod->username;
-			$user_id = $DataMod->user_id;
-            $idx = $DataMod->idx;
-            if($function != "Help")$C_UserAuth->changeTimeById(Now(),$idx);
-			// define("SN",$sn);
-			// define("USERNAME",$username);
-			// define("USER_ID",$user_id);
-			setcookie("XlMemTzAitUmm77oX0ga", $sn, 0, "/"); //權限人員
-		}
-		else{
-			setcookie("XlMemTzAitUmm77oX0ga", "", time()-3600, "/");
-			return array(403,'Access denied [1]');
-		}
-        $di=$PATH_APP."/".$function."/".$action.".php";
-		if(file_exists($PATH_APP."/".$function."/".$action.".php"))
-		{
-            $C_UserAccount = new UserAccount;
-			if(!$AuthMod = $C_UserAccount-> GetAuthModByUid($user_id)){
-				return array(403,'Access denied [3]');
-            }
-            $power = json_decode($AuthMod->Power->text,true);
-            if(array_key_exists($function,$power))
-                if(array_key_exists($action,$power[$function])){
-                    $meun=GetAuthorization($power);
-                    return array(0,$meun);
-                }
-            return array(403,'Access denied [4]');
-		}
-		else{
-			return array(403,'Access denied [2]');
-		}
-
-
-    }
-    function GetAuthorization($power)
-	{
-		$menu = ServerInfo();
-		foreach ($menu as $key => $dir) {
-
-			if(!isset($power[$dir[2]]))
-			{
-				unset($menu[$key]);
-				continue;
-			}
-
-			foreach ($dir[0] as $k => $sub)
-			{
-
-				if(!isset($power[$dir[2]][$sub[0]]))
-				{
-					unset($menu[$key][0][$k]);
-				}
-				elseif(!$sub[2])
-					unset($menu[$key][0][$k]);
-			}
-
-			if(count($menu[$key][0]) == 0)
-				unset($menu[$key]);
-
-
-			if(isset($menu[$key]) && $menu[$key][1] == 'HR'){
-				if($menu[$key][0][0][1]=="Home"){
-                    $sign = "";
-					if(array_key_exists("sign",$_COOKIE)){
-                        $sign = $_COOKIE["sign"];
-                        $menu[$key][0][0][1]='Home <img src="../dist/img/if_check_1930264.png"/>';
-                    }
-				}
-				$menu[$key] = array($menu[$key][0][0][0],$menu[$key][0][0][1]);
-			}
-		}
-
-		$menu = array_values($menu);
-		return $menu;
-    }
-
-
-    function ServerInfo()
+function ServerInfo()
     {
         //--HR----------------------------------------------------------
 		$hr = array();
-		$hr[] = array('index','Home',0);
-		$hr[] = array('Login','Login',0);
-		$hr[] = array('Logout','Logout',0);
+		$hr[] = array('Logout','安全離開',1);
 		$menu[] = array($hr,"HR","HR");
 
         //--系統設定-----------------------------------------------------
@@ -187,4 +89,3 @@ function checkAuth($function,$action=null)
 
         return $menu;
     }
-?>

@@ -1,55 +1,50 @@
 <?php
 namespace App\Http\Controllers\_Backstage\Action\HR;
 use Illuminate\Http\Request;
-use App\Models\UserAuth;
-use App\Models\UserAccount;
-require_once(config('sys.PATH_HOME').'app/Http/base.php');
-class Index extends \App\Http\Controllers\Controller
+use App\Models\db\UserAuth;
+use App\Models\db\UserAccount;
+class index extends \App\Http\Controllers\_Backstage\Action\BaseAction
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    function __construct() {
 
-    }
-    public function index($request,$function,$action)
+    function show($request,$function,$action)
     {
-        $checkData=checkAuth($function,$action); //正確返回 [0,$meun] 錯誤返回 [404,$message]
-        if($checkData[0]){
-            return abort($checkData[0],$checkData[1]);
-        }
-        $menu=$checkData[1]; //導入左側選單
-        $Auth=0;
-        $sign="";
-        $_power=true;
-        switch ($Auth) {
-            case '1':
-            case '4':
-            case '2':
-                $_power=true;
-            break;
+        return view('index', $this->assignData());
+    }
+
+    function exeAjax($request){
+        switch ($request->input('cmd','')) {
+            case 'useSign':
+                $this->returnData=$this->changeSign($request->input('data',''));
+                break;
+            case 'clearSign':
+                setcookie("sign", '', -3600, "/");
+                break;
             default:
+                $this->errorCode=1;
+                $this->errorMsg='E001';
                 break;
         }
-        $_oldsign = $sign;
-        $cc=$request->input('cc','');
-        if($cc!=''){
-            // CleanSign();
-            // Redirect('index');
-        }else{
-            $sign = $request->input('sign','');
-            if($sign!=''){
-                setcookie("sign", $sign, 0, "/");
-                // Redirect('index');
-            }
-        }
-        return view('index',[
-            'oldsign' => $_oldsign,
-            'power'   => $_power,
-        ]);
+        return $this->ReturnJson();
     }
+
+    function changeSign($input){
+
+        if(!array_key_exists('sign',$input) || $input['sign']==='' || $input['sign']===null)
+        {
+            setcookie("sign", '', -3600, "/");
+            $this->errorCode=1;
+            $this->errorMsg='E002';
+            return array();
+        }
+        setcookie("sign", $input['sign'], 0, "/");
+        return array('sign'=>$input['sign']);
+    }
+
 
 
 

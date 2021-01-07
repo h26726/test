@@ -7,7 +7,8 @@ return [
 	"TITLE"=>"<<測試機>>",
 	// "RD_USERNAME"=>"RD_Tingyu",
     "RD_USERID"=>"224",
-
+    "DIR_CODE"=>'XlMemTzAitUmm77oX0ga',
+    "DIR_CODE_sn"=>'XlMemTzAitUmm77oX0gasn',
     "PATH_HOME"=> dirname(dirname(__FILE__)) . '/',
     "PATH_STAGE"=> dirname(dirname(__FILE__)) .'/app/Http/Controllers/_Backstage',
     "PATH_APP"=>dirname(dirname(__FILE__)) .'/app/Http/Controllers/_Backstage/Action',

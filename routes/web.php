@@ -11,49 +11,61 @@ use Illuminate\Http\Request;
 |
 */
 
-// Route::get('/', 'Backend\WebsiteController@edit')->name('website.edit');
-// Route::post('/', 'Backend\WebsiteController@update')->name('website.update');
-
-// Route::group(['middleware' => 'auth'], function () {
-//     Route::get('/', function () {
-//         return view('frontend.index');
-//     })->name('home');
-//     Route::get('store', function () {
-//         return view('frontend.store');
-//     })->name('store');
-// });
-// Route::get('about', function () {
-//     return view('frontend.about');
-// })->name('about');
-
-// Route::get('products', function () {
-//     return redirect()->route('admin::store');
-// })->name('products');
-
-// Route::resource('photo', 'PhotoController');
-
-// Route::resource('test', 'TestController');
-Route::post('/EN', '_Backstage\EN@index');
 Route::get('/EN', '_Backstage\EN@index'); //取XSRF-TOKEN
-Route::get('/', '_Backstage\EN@index');
-Route::get('/XlMemTzAitUmm77oX0ga/{sn?}',function($sn=""){
+//-----------------------------------------------------------------------
+Route::post('/EN', '_Backstage\EN@index');
+
+// Route::get('/', '_Backstage\EN@index');
+Route::get('/'.config('sys.DIR_CODE').'/{sn?}',function($sn=""){
     $app=App::make('App\Http\Controllers\_Backstage\Login');
     return $app->index($sn);
 });
-// Route::get('/XlMemTzAitUmm77oX0gasn/{sn}', "_Backstage\\".$sn."@index");
-Route::get('/XlMemTzAitUmm77oX0gasn/{function}-{action}',  function($function,$action,Request $request){
-    $app=App::make('App\Http\Controllers\_Backstage\Action\\'.$function.'\\'.$action);
-    return $app->index($request,$function,$action);
-    //->index(1)
+// Route::get(config('sys.DIR_CODE_sn').'/{function}-{action}',  function($function,$action,Request $request){
+//     $app=App::make('App\Http\Controllers\_Backstage\Action\\'.$function.'\\'.$action);
+//     return $app->index($request,$function,$action);
+// })->middleware('CheckAuth');
+// Route::post(config('sys.DIR_CODE_sn').'/{function}-{action}',  function($function,$action,Request $request){
+//     $app=App::make('App\Http\Controllers\_Backstage\Action\\'.$function.'\\'.$action);
+//     return $app->exeAjax($request);
+// });
+
+Route::group(['prefix' => config('sys.DIR_CODE_sn').'/{function}-{action}','middleware' => 'CheckAuth'], function () {
+    Route::get('/', function($function,$action,Request $request){
+        $app=App::make('App\Http\Controllers\_Backstage\Action\\'.$function.'\\'.$action);
+        return $app->show($request,$function,$action);
+    });
+    Route::post('/', function($function,$action,Request $request){
+        $app=App::make('App\Http\Controllers\_Backstage\Action\\'.$function.'\\'.$action);
+        return $app->exeAjax($request);
+    });
 });
 
+
+// Route::get('/XlMemTzAitUmm77oX0gasn/{sn}', "_Backstage\\".$sn."@index");
+// Route::get('/XlMemTzAitUmm77oX0gasn/{function}-{action}',  function($function,$action,Request $request){
+//     $app=App::make('App\Http\Controllers\_Backstage\Action\\'.$function.'\\'.$action);
+//     return $app->index($request,$function,$action);
+//     //->index(1)
+// });
+
+Route::fallback(function () {
+    return view('errors.errors404',['msg' => '']);
+})->name('error');
+
+Route::post('error',function ($n,$msg) {
+    return view('errors.errors'.$n,['msg' => $msg]);
+})->name('error');
+
 //----------------------------
-Route::resource('login', 'LoginController');
-Route::resource('Main', 'MainController');
-Route::get('', function ($n=404,$msg='') {
 
-     return view('errors.errors'.$n,['msg' => $msg]);
-})->name('error');;
+
+Route::post('', function () {
+
+});
 //---------------------------------
-
-
+Route::get('/test', function(){
+    return view('index',['msg' => 1]);
+});
+Route::get('/test2', function(){
+    return view('index2',['msg' => 1]);
+});
